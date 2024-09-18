@@ -123,9 +123,12 @@
             <h3>Add Availability</h3>
             <div class="person-selector">
                 <select id="personSelect">
-                    <option value="Luke" data-color="blue">Luke</option>
-                    <option value="Logan" data-color="green">Logan</option>
-                    <option value="Emma" data-color="red">Emma</option>
+                    <option value="Cody" data-color="blue">Cody</option>
+                    <option value="Moses" data-color="orange">Moses</option>
+                    <option value="Halle" data-color="purple">Halle</option>
+                    <option value="Nathan" data-color="green">Nathan</option>
+                    <option value="Ahmad" data-color="red">Ahmad</option>
+                    <option value="Luke" data-color="cyan">Luke</option>
                 </select>
             </div>
             <input type="text" id="eventTime" placeholder="Available Time (e.g. 10:00 AM)">
@@ -187,9 +190,12 @@
 
         function generateLegend() {
             legend.innerHTML = `
-                <div class="legend-item"><span class="color-box" style="background-color: blue;"></span> Luke</div>
-                <div class="legend-item"><span class="color-box" style="background-color: green;"></span> Logan</div>
-                <div class="legend-item"><span class="color-box" style="background-color: red;"></span> Emma</div>
+                <div class="legend-item"><span class="marker" style="background-color: blue;"></span> Cody</div>
+                <div class="legend-item"><span class="marker" style="background-color: orange;"></span> Moses</div>
+                <div class="legend-item"><span class="marker" style="background-color: purple;"></span> Halle</div>
+                <div class="legend-item"><span class="marker" style="background-color: green;"></span> Nathan</div>
+                <div class="legend-item"><span class="marker" style="background-color: red;"></span> Ahmad</div>
+                <div class="legend-item"><span class="marker" style="background-color: cyan;"></span> Luke</div>
             `;
         }
 
@@ -236,4 +242,3 @@
     </script>
 </body>
 </html>
-
