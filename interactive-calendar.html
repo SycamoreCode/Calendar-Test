@@ -56,20 +56,19 @@
         .day:hover {
             background-color: #e0e0e0;
         }
-        .day.active {
-            color: white;
-        }
         .day-number {
             font-weight: bold;
         }
-        .day-event {
-            font-size: 10px;
-            text-align: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            width: 100%;
-            padding: 2px;
+        .markers {
+            display: flex;
+            justify-content: center;
+            margin-top: 5px;
+        }
+        .marker {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin: 0 3px; /* Spacing between dots */
         }
         .modal {
             display: none;
@@ -104,12 +103,8 @@
         .person-selector {
             margin-bottom: 10px;
         }
-        .color-box {
-            display: inline-block;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            margin-right: 5px;
+        .availability-details {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -123,7 +118,9 @@
     <div id="eventModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Add Availability</h2>
+            <h2>Availability Details</h2>
+            <div id="availabilityList" class="availability-details"></div>
+            <h3>Add Availability</h3>
             <div class="person-selector">
                 <select id="personSelect">
                     <option value="Luke" data-color="blue">Luke</option>
@@ -133,7 +130,6 @@
             </div>
             <input type="text" id="eventTime" placeholder="Available Time (e.g. 10:00 AM)">
             <button onclick="addEvent()">Add</button>
-            <div id="eventDetails"></div>
         </div>
     </div>
 
@@ -143,6 +139,7 @@
         const legend = document.getElementById('legend');
         const modal = document.getElementById('eventModal');
         const closeBtn = document.getElementsByClassName('close')[0];
+        const availabilityList = document.getElementById('availabilityList');
         let currentDate = new Date();
         let selectedDay = null;
         let events = {};
@@ -170,14 +167,15 @@
                 
                 // Show markers for each user's availability
                 if (events[dateString]) {
+                    const markers = document.createElement('div');
+                    markers.classList.add('markers');
                     events[dateString].forEach(event => {
                         const marker = document.createElement('div');
-                        marker.style.width = '10px';
-                        marker.style.height = '10px';
-                        marker.style.borderRadius = '50%';
+                        marker.classList.add('marker');
                         marker.style.backgroundColor = event.color;
-                        dayElement.appendChild(marker);
+                        markers.appendChild(marker);
                     });
+                    dayElement.appendChild(markers);
                 }
 
                 dayElement.addEventListener('click', () => openModal(day));
@@ -197,6 +195,17 @@
 
         function openModal(day) {
             selectedDay = day;
+            const dateString = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${selectedDay}`;
+            availabilityList.innerHTML = '';
+
+            if (events[dateString]) {
+                events[dateString].forEach(event => {
+                    const detail = document.createElement('div');
+                    detail.innerHTML = `<span class="marker" style="background-color: ${event.color};"></span> ${event.name} - ${event.time}`;
+                    availabilityList.appendChild(detail);
+                });
+            }
+
             modal.style.display = 'block';
         }
 
@@ -227,3 +236,4 @@
     </script>
 </body>
 </html>
+
