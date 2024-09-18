@@ -75,6 +75,9 @@
             border-radius: 50%;
             margin: 0 3px; /* Spacing between dots */
         }
+        .marker-container {
+            margin-top: 5px; /* Space above circles */
+        }
         .modal {
             display: none;
             position: fixed;
@@ -111,6 +114,12 @@
         .availability-details {
             margin-top: 10px;
         }
+        .trash-icon {
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -141,16 +150,27 @@
         </div>
     </div>
 
+    <div id="confirmDeleteModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirm Deletion</h2>
+            <p>Are you sure you want to delete this entry?</p>
+            <button id="cancelDelete">Cancel</button>
+            <button id="confirmDelete">Delete</button>
+        </div>
+    </div>
+
     <script>
         const calendar = document.getElementById('calendarDays');
         const monthDisplay = document.getElementById('currentMonth');
         const legend = document.getElementById('legend');
         const modal = document.getElementById('eventModal');
+        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
         const closeBtn = document.getElementsByClassName('close')[0];
         const availabilityList = document.getElementById('availabilityList');
         let currentDate = new Date();
         let selectedDay = null;
         let events = {};
+        let deleteIndex = null;
 
         function generateCalendar() {
             const year = currentDate.getFullYear();
@@ -176,7 +196,7 @@
                 // Show markers for each user's availability
                 if (events[dateString]) {
                     const markers = document.createElement('div');
-                    markers.classList.add('markers');
+                    markers.classList.add('markers', 'marker-container');
                     events[dateString].forEach(event => {
                         const marker = document.createElement('div');
                         marker.classList.add('marker');
@@ -210,9 +230,14 @@
             availabilityList.innerHTML = '';
 
             if (events[dateString]) {
-                events[dateString].forEach(event => {
+                events[dateString].forEach((event, index) => {
                     const detail = document.createElement('div');
                     detail.innerHTML = `<span class="marker" style="background-color: ${event.color};"></span> ${event.name} - ${event.time}`;
+                    const trashIcon = document.createElement('img');
+                    trashIcon.src = 'https://img.icons8.com/material-outlined/24/000000/trash.png'; // Trash can icon
+                    trashIcon.classList.add('trash-icon');
+                    trashIcon.onclick = () => confirmDelete(index, dateString);
+                    detail.appendChild(trashIcon);
                     availabilityList.appendChild(detail);
                 });
             }
@@ -236,10 +261,29 @@
             }
         }
 
+        function confirmDelete(index, dateString) {
+            deleteIndex = index;
+            confirmDeleteModal.style.display = 'block';
+
+            document.getElementById('confirmDelete').onclick = () => {
+                events[dateString].splice(deleteIndex, 1);
+                if (events[dateString].length === 0) {
+                    delete events[dateString];
+                }
+                generateCalendar();
+                confirmDeleteModal.style.display = 'none';
+            };
+
+            document.getElementById('cancelDelete').onclick = () => {
+                confirmDeleteModal.style.display = 'none';
+            };
+        }
+
         closeBtn.onclick = () => modal.style.display = 'none';
         window.onclick = (event) => {
-            if (event.target == modal) {
+            if (event.target == modal || event.target == confirmDeleteModal) {
                 modal.style.display = 'none';
+                confirmDeleteModal.style.display = 'none';
             }
         }
 
