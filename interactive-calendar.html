@@ -19,7 +19,7 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            width: 350px;
+            width: 500px; /* Increased width for larger calendar */
         }
         .header {
             background-color: #4CAF50;
@@ -49,7 +49,6 @@
             background-color: #e0e0e0;
         }
         .day.active {
-            background-color: #4CAF50;
             color: white;
         }
         .day-number {
@@ -94,6 +93,16 @@
             text-decoration: none;
             cursor: pointer;
         }
+        .person-selector {
+            margin-bottom: 10px;
+        }
+        .color-box {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -106,9 +115,17 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>Add Event</h2>
-            <input type="text" id="eventName" placeholder="Event Name">
+            <div class="person-selector">
+                <select id="personSelect">
+                    <option value="Luke" data-color="blue">Luke</option>
+                    <option value="Logan" data-color="green">Logan</option>
+                    <option value="Emma" data-color="red">Emma</option>
+                </select>
+            </div>
+            <input type="text" id="eventTime" placeholder="Available Time (e.g. 10:00 AM)">
             <button onclick="addEvent()">Add</button>
             <button id="attendButton" onclick="toggleAttendance()">Mark Attendance</button>
+            <div id="eventDetails"></div>
         </div>
     </div>
 
@@ -145,10 +162,8 @@
                     const eventElement = document.createElement('div');
                     eventElement.classList.add('day-event');
                     eventElement.textContent = events[dateString].name;
-                    if (events[dateString].attending) {
-                        eventElement.style.backgroundColor = '#4CAF50';
-                        eventElement.style.color = 'white';
-                    }
+                    eventElement.style.backgroundColor = events[dateString].color; // Set color based on event
+                    eventElement.style.color = 'white';
                     dayElement.appendChild(eventElement);
                 }
 
@@ -162,18 +177,32 @@
             modal.style.display = 'block';
             const dateString = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${day}`;
             const attendButton = document.getElementById('attendButton');
+
             if (events[dateString] && events[dateString].attending) {
                 attendButton.textContent = 'Unmark Attendance';
             } else {
                 attendButton.textContent = 'Mark Attendance';
             }
+
+            // Display existing events for the selected day
+            const eventDetails = document.getElementById('eventDetails');
+            eventDetails.innerHTML = '';
+            if (events[dateString]) {
+                const eventInfo = document.createElement('div');
+                eventInfo.textContent = `${events[dateString].name} - ${events[dateString].time}`;
+                eventInfo.style.color = events[dateString].color;
+                eventDetails.appendChild(eventInfo);
+            }
         }
 
         function addEvent() {
-            const eventName = document.getElementById('eventName').value;
+            const eventName = document.getElementById('personSelect').value;
+            const eventColor = document.getElementById('personSelect').selectedOptions[0].dataset.color;
+            const eventTime = document.getElementById('eventTime').value;
+
             if (eventName) {
                 const dateString = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${selectedDay}`;
-                events[dateString] = { name: eventName, attending: false };
+                events[dateString] = { name: eventName, time: eventTime, color: eventColor, attending: false };
                 generateCalendar();
                 modal.style.display = 'none';
             }
