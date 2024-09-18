@@ -142,7 +142,7 @@
                     <option value="Halle" data-color="purple">Halle</option>
                     <option value="Nathan" data-color="green">Nathan</option>
                     <option value="Ahmad" data-color="red">Ahmad</option>
-                    <option value="Luke" data-color="cyan">Luke</option>
+                    <option value="Luke" data-color="darkblue">Luke</option> <!-- Changed to dark blue -->
                 </select>
             </div>
             <input type="text" id="eventTime" placeholder="Available Time (e.g. 10:00 AM)">
@@ -220,7 +220,7 @@
                 <div class="legend-item"><span style="color: purple;">Halle</span></div>
                 <div class="legend-item"><span style="color: green;">Nathan</span></div>
                 <div class="legend-item"><span style="color: red;">Ahmad</span></div>
-                <div class="legend-item"><span style="color: cyan;">Luke</span></div>
+                <div class="legend-item"><span style="color: darkblue;">Luke</span></div> <!-- Changed to dark blue -->
             `;
         }
 
@@ -271,6 +271,7 @@
                     delete events[dateString];
                 }
                 generateCalendar();
+                availabilityList.innerHTML = ''; // Clear the availability details immediately
                 confirmDeleteModal.style.display = 'none';
             };
 
