@@ -36,6 +36,10 @@
             display: inline-block;
             margin-right: 10px;
         }
+        .legend-item span {
+            font-weight: bold;
+            text-decoration: underline;
+        }
         .days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -61,6 +65,7 @@
         }
         .markers {
             display: flex;
+            flex-wrap: wrap; /* Allow wrapping for the dots */
             justify-content: center;
             margin-top: 5px;
         }
@@ -190,12 +195,12 @@
 
         function generateLegend() {
             legend.innerHTML = `
-                <div class="legend-item"><span class="marker" style="background-color: blue;"></span> Cody</div>
-                <div class="legend-item"><span class="marker" style="background-color: orange;"></span> Moses</div>
-                <div class="legend-item"><span class="marker" style="background-color: purple;"></span> Halle</div>
-                <div class="legend-item"><span class="marker" style="background-color: green;"></span> Nathan</div>
-                <div class="legend-item"><span class="marker" style="background-color: red;"></span> Ahmad</div>
-                <div class="legend-item"><span class="marker" style="background-color: cyan;"></span> Luke</div>
+                <div class="legend-item"><span style="color: blue;">Cody</span></div>
+                <div class="legend-item"><span style="color: orange;">Moses</span></div>
+                <div class="legend-item"><span style="color: purple;">Halle</span></div>
+                <div class="legend-item"><span style="color: green;">Nathan</span></div>
+                <div class="legend-item"><span style="color: red;">Ahmad</span></div>
+                <div class="legend-item"><span style="color: cyan;">Luke</span></div>
             `;
         }
 
