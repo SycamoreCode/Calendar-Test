@@ -5,7 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Monthly Calendar</title>
     <style>
-        /* Your existing styles */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .calendar {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 500px;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 20px;
+        }
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            padding: 10px;
+        }
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .day:hover {
+            background-color: #e0e0e0;
+        }
+        .day-number {
+            font-weight: bold;
+        }
+        .markers {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 5px;
+        }
+        .marker {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin: 0 3px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -31,9 +118,10 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
-    <script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+        import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js';
+
         const firebaseConfig = {
             apiKey: "AIzaSyDk4e4m8wASE7EE-wLJcjE8FqYnIcrmBZA",
             authDomain: "interactive-calendar-a61c5.firebaseapp.com",
@@ -43,8 +131,9 @@
             messagingSenderId: "701603632695",
             appId: "1:701603632695:web:cae42b638fac8fc632d1b2"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
         const calendar = document.getElementById('calendarDays');
         const monthDisplay = document.getElementById('currentMonth');
@@ -100,22 +189,28 @@
                     events[dateString] = [];
                 }
                 events[dateString].push({ name: eventName, time: eventTime, color: eventColor });
-                saveEvents(); // Save to Realtime Database
+                saveEvents();
                 generateCalendar();
                 modal.style.display = 'none';
             }
         }
 
         function saveEvents() {
-            db.ref('events/calendar').set(events);
+            set(ref(db, 'events/calendar'), events).catch((error) => {
+                console.error("Error saving events: ", error);
+            });
         }
 
         function loadEvents() {
-            db.ref('events/calendar').once('value').then((snapshot) => {
+            get(ref(db, 'events/calendar')).then((snapshot) => {
                 if (snapshot.exists()) {
                     events = snapshot.val();
                     generateCalendar();
+                } else {
+                    console.log("No data available");
                 }
+            }).catch((error) => {
+                console.error("Error loading events: ", error);
             });
         }
 
