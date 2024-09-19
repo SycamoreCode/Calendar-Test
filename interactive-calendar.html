@@ -19,7 +19,7 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            width: 500px; /* Increased width for larger calendar */
+            width: 500px;
         }
         .header {
             background-color: #4CAF50;
@@ -65,7 +65,7 @@
         }
         .markers {
             display: flex;
-            flex-wrap: wrap; /* Allow wrapping for the dots */
+            flex-wrap: wrap;
             justify-content: center;
             margin-top: 5px;
         }
@@ -73,10 +73,10 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            margin: 0 3px; /* Spacing between dots */
+            margin: 0 3px;
         }
         .marker-container {
-            margin-top: 5px; /* Space above circles */
+            margin-top: 5px;
         }
         .modal {
             display: none;
@@ -159,7 +159,23 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>  
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDk4e4m8wASE7EE-wLJcjE8FqYnIcrmBZA",
+            authDomain: "interactive-calendar-a61c5.firebaseapp.com",
+            databaseURL: "https://interactive-calendar-a61c5-default-rtdb.firebaseio.com",
+            projectId: "interactive-calendar-a61c5",
+            storageBucket: "interactive-calendar-a61c5.appspot.com",
+            messagingSenderId: "701603632695",
+            appId: "1:701603632695:web:cae42b638fac8fc632d1b2"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         const calendar = document.getElementById('calendarDays');
         const monthDisplay = document.getElementById('currentMonth');
         const legend = document.getElementById('legend');
@@ -193,24 +209,46 @@
                 
                 const dateString = `${year}-${month + 1}-${day}`;
                 
-                // Show markers for each user's availability
-                if (events[dateString]) {
-                    const markers = document.createElement('div');
-                    markers.classList.add('markers', 'marker-container');
-                    events[dateString].forEach(event => {
-                        const marker = document.createElement('div');
-                        marker.classList.add('marker');
-                        marker.style.backgroundColor = event.color;
-                        markers.appendChild(marker);
-                    });
-                    dayElement.appendChild(markers);
-                }
-
                 dayElement.addEventListener('click', () => openModal(day));
                 calendar.appendChild(dayElement);
             }
 
             generateLegend();
+
+            // Fetch events from Firebase
+            database.ref('events').once('value')
+                .then((snapshot) => {
+                    events = snapshot.val() || {};
+                    updateCalendarDisplay();
+                })
+                .catch((error) => {
+                    console.error("Error fetching events: ", error);
+                });
+        }
+
+        function updateCalendarDisplay() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            calendar.querySelectorAll('.day').forEach((dayElement, index) => {
+                const day = index + 1 - new Date(year, month, 1).getDay() + 1;
+                if (day > 0 && day <= new Date(year, month + 1, 0).getDate()) {
+                    const dateString = `${year}-${month + 1}-${day}`;
+                    const dayEvents = events[dateString];
+
+                    if (dayEvents) {
+                        const markers = document.createElement('div');
+                        markers.classList.add('markers', 'marker-container');
+                        dayEvents.forEach(event => {
+                            const marker = document.createElement('div');
+                            marker.classList.add('marker');
+                            marker.style.backgroundColor = event.color;
+                            markers.appendChild(marker);
+                        });
+                        dayElement.appendChild(markers);
+                    }
+                }
+            });
         }
 
         function generateLegend() {
@@ -220,7 +258,7 @@
                 <div class="legend-item"><span style="color: purple;">Halle</span></div>
                 <div class="legend-item"><span style="color: green;">Nathan</span></div>
                 <div class="legend-item"><span style="color: red;">Ahmad</span></div>
-                <div class="legend-item"><span style="color: darkblue;">Luke</span></div> <!-- Changed to dark blue -->
+                <div class="legend-item"><span style="color: darkblue;">Luke</span></div>
             `;
         }
 
@@ -234,7 +272,7 @@
                     const detail = document.createElement('div');
                     detail.innerHTML = `<span class="marker" style="background-color: ${event.color};"></span> ${event.name} - ${event.time}`;
                     const trashIcon = document.createElement('img');
-                    trashIcon.src = 'https://img.icons8.com/material-outlined/24/000000/trash.png'; // Trash can icon
+                    trashIcon.src = 'https://img.icons8.com/material-outlined/24/000000/trash.png';
                     trashIcon.classList.add('trash-icon');
                     trashIcon.onclick = () => confirmDelete(index, dateString);
                     detail.appendChild(trashIcon);
@@ -255,9 +293,19 @@
                 if (!events[dateString]) {
                     events[dateString] = [];
                 }
-                events[dateString].push({ name: eventName, time: eventTime, color: eventColor });
-                generateCalendar();
-                modal.style.display = 'none';
+                const newEvent = { name: eventName, time: eventTime, color: eventColor };
+                events[dateString].push(newEvent);
+
+                // Save to Firebase
+                database.ref('events').set(events)
+                    .then(() => {
+                        console.log("Event added successfully");
+                        generateCalendar();
+                        modal.style.display = 'none';
+                    })
+                    .catch((error) => {
+                        console.error("Error adding event: ", error);
+                    });
             }
         }
 
@@ -270,9 +318,18 @@
                 if (events[dateString].length === 0) {
                     delete events[dateString];
                 }
-                generateCalendar();
-                availabilityList.innerHTML = ''; // Clear the availability details immediately
-                confirmDeleteModal.style.display = 'none';
+
+                // Update Firebase
+                database.ref('events').set(events)
+                    .then(() => {
+                        console.log("Event deleted successfully");
+                        generateCalendar();
+                        availabilityList.innerHTML = '';
+                        confirmDeleteModal.style.display = 'none';
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting event: ", error);
+                    });
             };
 
             document.getElementById('cancelDelete').onclick = () => {
@@ -290,30 +347,5 @@
 
         generateCalendar();
     </script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>  
-    <script>
-        const firebaseConfig = {
-
-    apiKey: "AIzaSyDk4e4m8wASE7EE-wLJcjE8FqYnIcrmBZA",
-
-    authDomain: "interactive-calendar-a61c5.firebaseapp.com",
-
-    databaseURL: "https://interactive-calendar-a61c5-default-rtdb.firebaseio.com",
-
-    projectId: "interactive-calendar-a61c5",
-
-    storageBucket: "interactive-calendar-a61c5.appspot.com",
-
-    messagingSenderId: "701603632695",
-
-    appId: "1:701603632695:web:cae42b638fac8fc632d1b2"
-
-  };
-
-      Const app = initializeApp(firebaseConfig);
-
-    </script>  
-    </script>	
 </body>
 </html>
