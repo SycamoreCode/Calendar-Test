@@ -119,9 +119,11 @@
     </div>
 
     <script type="module">
+        // Import the Firebase modules
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
         import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js';
 
+        // Firebase configuration with the user's data
         const firebaseConfig = {
             apiKey: "AIzaSyDk4e4m8wASE7EE-wLJcjE8FqYnIcrmBZA",
             authDomain: "interactive-calendar-a61c5.firebaseapp.com",
@@ -132,6 +134,7 @@
             appId: "1:701603632695:web:cae42b638fac8fc632d1b2"
         };
         
+        // Initialize Firebase and Database
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
@@ -143,6 +146,7 @@
         let selectedDay = null;
         let events = {};
 
+        // Generate the calendar for the current month
         function generateCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
@@ -152,11 +156,13 @@
             monthDisplay.textContent = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
             calendar.innerHTML = '';
 
+            // Fill empty days at the start of the month
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
                 calendar.appendChild(emptyDay);
             }
 
+            // Add days with event markers if available
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayElement = document.createElement('div');
                 dayElement.classList.add('day');
@@ -168,16 +174,19 @@
                     dayElement.innerHTML += colors;
                 }
 
+                // Open the modal when a day is clicked
                 dayElement.addEventListener('click', () => openModal(day));
                 calendar.appendChild(dayElement);
             }
         }
 
+        // Open the modal for adding events
         function openModal(day) {
             selectedDay = day;
             modal.style.display = 'block';
         }
 
+        // Add an event to the selected day
         function addEvent() {
             const eventName = document.getElementById('personSelect').value;
             const eventColor = document.querySelector(`#personSelect option[value="${eventName}"]`).getAttribute('data-color');
@@ -195,12 +204,14 @@
             }
         }
 
+        // Save events to Firebase
         function saveEvents() {
             set(ref(db, 'events/calendar'), events).catch((error) => {
                 console.error("Error saving events: ", error);
             });
         }
 
+        // Load events from Firebase
         function loadEvents() {
             get(ref(db, 'events/calendar')).then((snapshot) => {
                 if (snapshot.exists()) {
@@ -214,13 +225,15 @@
             });
         }
 
+        // Close the modal
         closeBtn.onclick = () => modal.style.display = 'none';
         window.onclick = (event) => {
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
-        }
+        };
 
+        // Load the calendar and events on window load
         window.onload = () => {
             loadEvents();
             generateCalendar();
