@@ -227,29 +227,32 @@
         }
 
         function updateCalendarDisplay() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
 
-            calendar.querySelectorAll('.day').forEach((dayElement, index) => {
-                const day = index + 1 - new Date(year, month, 1).getDay() + 1;
-                if (day > 0 && day <= new Date(year, month + 1, 0).getDate()) {
-                    const dateString = `${year}-${month + 1}-${day}`;
-                    const dayEvents = events[dateString];
+        calendar.querySelectorAll('.day').forEach((dayElement, index) => {
+        // Determine which day this element corresponds to
+        const dayOffset = index - new Date(year, month, 1).getDay() + 1;
+        const day = dayOffset > 0 ? dayOffset : null;
+        if (day && day <= new Date(year, month + 1, 0).getDate()) {
+            const dateString = `${year}-${month + 1}-${day}`;
+            const dayEvents = events[dateString];
 
-                    if (dayEvents) {
-                        const markers = document.createElement('div');
-                        markers.classList.add('markers', 'marker-container');
-                        dayEvents.forEach(event => {
-                            const marker = document.createElement('div');
-                            marker.classList.add('marker');
-                            marker.style.backgroundColor = event.color;
-                            markers.appendChild(marker);
-                        });
-                        dayElement.appendChild(markers);
-                    }
+                if (dayEvents) {
+                    const markers = document.createElement('div');
+                    markers.classList.add('markers', 'marker-container');
+                    dayEvents.forEach(event => {
+                        const marker = document.createElement('div');
+                        marker.classList.add('marker');
+                        marker.style.backgroundColor = event.color;
+                        markers.appendChild(marker);
+                    });
+                    dayElement.appendChild(markers);
                 }
-            });
+            }
+        });
         }
+
 
         function generateLegend() {
             legend.innerHTML = `
